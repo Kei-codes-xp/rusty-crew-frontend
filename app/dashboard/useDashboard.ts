@@ -1,5 +1,5 @@
 import { useEmployees } from "@/features/employees/useEmployees";
-import { useAttendance } from "@/features/attendance/useAttendance";
+import { useAttendance } from "@/features/attendance/hooks/useAttendance";
 import { useSchedule } from "@/features/schedule/useSchedule";
 import { useLeave } from "@/features/leave/useLeave";
 import { SwapRequest } from "@/types/schedule";

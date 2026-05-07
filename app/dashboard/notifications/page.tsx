@@ -1,19 +1,27 @@
 "use client"
 import { useState } from "react";
 import { S } from "@/styles/dashboardStyles";
-import { INITIAL_NOTIFICATIONS } from "@/features/notification/notification.data";
-import { AppNotification } from "@/types/notification";
-
-
+// import { useNotifications } from "@/features/notification/hooks/useNotification";
+import { useNotificationsStore } from "@/store/notificationsStore";
 
 const NotificationsPage = () => {
-    const [notifs, setNotifs] = useState<AppNotification[]>(INITIAL_NOTIFICATIONS);
+    const {
+        notifs,
+        loading,
+        markAllRead,
+        handleDismiss,
+        fetchNotifications,
+    } = useNotificationsStore();
+
+
 
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 15, fontWeight: 700 }}>Notifications</div>
-                <button style={S.btnSm} onClick={() => setNotifs(prev => prev.map(n => ({ ...n, read: true })))}>Mark all read</button>
+                <button style={S.btnSm} onClick={markAllRead}>
+                    Mark all read
+                </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {notifs.map(n => (
@@ -30,7 +38,7 @@ const NotificationsPage = () => {
                             <div style={{ fontSize: 11, color: '#444', marginTop: 3 }}>{n.time}</div>
                         </div>
                         {!n.read && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#f5a623', flexShrink: 0 }} />}
-                        <button style={S.btnSm} onClick={() => setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))}>Dismiss</button>
+                        <button style={S.btnSm} onClick={() => handleDismiss(n.id)}>Dismiss</button>
                     </div>
                 ))}
             </div>

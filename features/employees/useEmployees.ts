@@ -12,18 +12,18 @@ export function useEmployees() {
   const [showQrModal, setShowQrModal] = useState(false);
 
 
-  useEffect(() => {
-    api.get("/employees")
-      .then(res => {
-        setEmployees(res.data); // ✅ IMPORTANT FIX
-        console.log("data", res.data.data);
-      })
-      .catch(err => {
-        console.log("EMPLOYEES ERROR:", err);
-        setEmployees([]); // fallback safe array
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   api.get("/employees")
+  //     .then(res => {
+  //       setEmployees(res.data); // ✅ IMPORTANT FIX
+  //       console.log("data", res.data.data);
+  //     })
+  //     .catch(err => {
+  //       console.log("EMPLOYEES ERROR:", err);
+  //       setEmployees([]); // fallback safe array
+  //     })
+  //     .finally(() => setLoading(false));
+  // }, []);
 
   useEffect(() => {
     const fetchEmployees = async () => {

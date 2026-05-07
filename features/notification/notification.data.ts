@@ -1,12 +1,12 @@
 // features/notification/notification.data.ts
 
-import { AppNotification  } from "@/types/notification";
+import { Notification  } from "@/types/notification";
 
-export const INITIAL_NOTIFICATIONS: AppNotification [] = [
+export const INITIAL_NOTIFICATIONS:Notification [] = [
   {
     id: 1,
     type: "late",
-    message: "Juan Dela Cruz clocked in 8 mins late",
+    message: "",
     time: "06:08 AM",
     read: false,
   },

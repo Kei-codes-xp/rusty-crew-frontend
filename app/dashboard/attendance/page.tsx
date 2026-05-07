@@ -2,12 +2,13 @@
 import RoleBadge from "@/components/RoleBadge";
 import StatusBadge from "@/components/StatusBadge";
 import { useState } from "react";
-import { useAttendance } from "@/features/attendance/useAttendance";
+import { useAttendance } from "@/features/attendance/hooks/useAttendance";
 import { useDashboard } from "../useDashboard";
 import { TODAY } from "@/constants/calendar";
 import { S } from "@/styles/dashboardStyles";
 import Avatar from "@/components/Avatar";
-
+import { useQrScanner } from "@/features/attendance/hooks/useQrScanner";
+import QrScanner from "@/features/attendance/components/QrScanner";
 
 
 const AttendancePage = () => {
@@ -17,12 +18,10 @@ const AttendancePage = () => {
     const attendanceHook = useAttendance();
     const { employees, activeEmployees } = useDashboard();
     const [showClockIn, setShowClockIn] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
 
 
     const { timeLogs, setTimeLogs } = attendanceHook;
-
-
-
 
     function manualClock() {
         const emp = employees.find(e => e.id === parseInt(manualEmpId) && e.status === 'Active');
@@ -36,11 +35,16 @@ const AttendancePage = () => {
     }
 
 
+
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 15, fontWeight: 700 }}>Attendance Tracking</div>
                 <button style={S.btn} onClick={() => setShowClockIn(true)}>QR Clock-in</button>
+                {/* <button style={S.btn}  onClick={() => setIsScanning((prev) => !prev)}>
+                    {isScanning ? "Stop Scanner" : "Start Scanner"}
+                </button> */}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -112,6 +116,9 @@ const AttendancePage = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* <QrScanner enabled={isScanning} /> */}
+
         </div>
     );
 };

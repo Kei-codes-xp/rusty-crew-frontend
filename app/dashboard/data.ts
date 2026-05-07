@@ -90,7 +90,7 @@ export const INITIAL_NOTIFS: Notification[] = [
   {
     id: 1,
     type: "late",
-    message: "Juan Dela Cruz clocked in 8 mins late",
+    message: "",
     time: "06:08 AM",
     read: false,
   },
