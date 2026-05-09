@@ -1,18 +1,41 @@
-import { useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 import { TimeLog } from "@/types/attendance";
-import { TODAY, INITIAL_TIMELOGS } from "@/app/dashboard/data";
+import { TODAY, INITIAL_TIMELOGS } from "@/app/admin/dashboard/data";
+import { se } from "date-fns/locale";
+import api from "@/lib/api";
 
 export function useAttendance() {
-  const [timeLogs, setTimeLogs] = useState<TimeLog[]>(INITIAL_TIMELOGS);
+  const [timeLogs, setTimeLogs] = useState<TimeLog[]>();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchTimeLogs = async () => {
+      try {
+        const res = await api.get("/attendance")
+        setTimeLogs(res.data);
+
+      } catch (error) {
+        console.error("Failed to fetch time logs:", error);
+      } finally {
+        setLoading(false);
+      }
+
+    };
+    fetchTimeLogs();
+  }, []);
+
+
+
 
   function clock(empId: number) {
-    const existing = timeLogs.find(
+    const existing = timeLogs?.find(
       l => l.employeeId === empId && l.date === TODAY && !l.clockOut
     );
 
     if (existing) {
       setTimeLogs(prev =>
-        prev.map(l =>
+        prev?.map(l =>
           l.id === existing.id
             ? { ...l, clockOut: "17:00", hoursWorked: 8 }
             : l
@@ -20,7 +43,7 @@ export function useAttendance() {
       );
     } else {
       setTimeLogs(prev => [
-        ...prev,
+        ...prev??[],
         {
           id: Date.now(),
           employeeId: empId,

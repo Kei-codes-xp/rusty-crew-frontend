@@ -1,4 +1,4 @@
-import { useDashboard } from "@/app/dashboard/useDashboard";
+import { useDashboard } from "@/app/admin/dashboard/useDashboard";
 import { Employee } from "@/types/employee";
 
 

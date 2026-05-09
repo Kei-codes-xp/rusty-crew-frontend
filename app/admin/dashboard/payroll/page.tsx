@@ -28,8 +28,8 @@ const PayrollPage = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
         {[
           { label: 'Total payroll est.', val: `₱${activeEmployees.reduce((s, e) => s + getPayroll(e).gross, 0).toLocaleString()}` },
-          { label: 'Total hours', val: `${timeLogs.reduce((s, l) => s + l.hoursWorked, 0).toFixed(0)}h` },
-          { label: 'Overtime hours', val: `${timeLogs.reduce((s, l) => s + l.overtime, 0).toFixed(1)}h` },
+          { label: 'Total hours', val: `${timeLogs?.reduce((s, l) => s + l.hoursWorked, 0).toFixed(0)}h` },
+          { label: 'Overtime hours', val: `${timeLogs?.reduce((s, l) => s + l.overtime, 0).toFixed(1)}h` },
         ].map(m => (
           <div key={m.label} style={S.metric}>
             <div style={{ fontSize: 11, color: '#555', marginBottom: 6 }}>{m.label}</div>

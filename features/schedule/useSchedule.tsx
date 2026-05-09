@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
 import { Shift, ShiftType, SwapRequest } from "@/types/schedule";
-import { INITIAL_SHIFTS } from "@/app/dashboard/data";
 import api from "@/lib/api";
 
 export function useSchedule(weekStart: string) {

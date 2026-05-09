@@ -19,8 +19,229 @@
   }
 } */
 
+:root {
+  --amber:        #f5a623;
+  --amber-dim:    rgba(245, 166, 35, 0.15);
+  --amber-glow:   rgba(245, 166, 35, 0.06);
+  --emerald:      #4ade80;
+  --surface-1:    #161616;
+  --surface-2:    #1c1c1c;
+  --surface-3:    #222222;
+  --border:       rgba(255, 255, 255, 0.06);
+  --text-primary: rgba(255, 255, 255, 0.88);
+  --text-muted:   rgba(255, 255, 255, 0.35);
+  --text-dim:     rgba(255, 255, 255, 0.15);
+}
+ 
+/* ── Base reset ────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+ 
+html,
 body {
-  /* background: var(--background);
-  color: var(--foreground); */
-   font-family: var(--font-jetbrains-mono), monospace;
+  height:     100%;
+  margin:     0;
+  padding:    0;
+  background: #0e0e0e;
+  color:      var(--text-primary);
+  overflow:   hidden;
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+ 
+/* Prevent tap highlight on mobile/tablet kiosk */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select:         none;
+  user-select:                 none;
+}
+ 
+/* Allow text selection only inside data displays if needed */
+.selectable {
+  -webkit-user-select: text;
+  user-select:         text;
+}
+ 
+/* ── Scrollbar (scan feed panel) ───────────────────────────────────────────── */
+.kiosk-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 166, 35, 0.18) transparent;
+}
+.kiosk-scroll::-webkit-scrollbar       { width: 3px; }
+.kiosk-scroll::-webkit-scrollbar-track { background: transparent; }
+.kiosk-scroll::-webkit-scrollbar-thumb {
+  background:    rgba(245, 166, 35, 0.2);
+  border-radius: 10px;
+}
+ 
+/* ── QR ambient glow pulse ─────────────────────────────────────────────────── */
+@keyframes qr-glow {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(245, 166, 35, 0.08),
+                0 0 80px rgba(245, 166, 35, 0.04);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(245, 166, 35, 0.14),
+                0 0 120px rgba(245, 166, 35, 0.07);
+  }
+}
+.qr-glow {
+  animation: qr-glow 3.5s ease-in-out infinite;
+}
+ 
+/* ── QR refresh fade ───────────────────────────────────────────────────────── */
+@keyframes qr-fade-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.qr-fade-in {
+  animation: qr-fade-in 0.35s ease-out forwards;
+}
+ 
+/* ── Scan row slide-in ─────────────────────────────────────────────────────── */
+@keyframes scan-enter {
+  from {
+    opacity:   0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity:   1;
+    transform: translateY(0)     scale(1);
+  }
+}
+.scan-enter {
+  animation: scan-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+ 
+/* ── Shimmer skeleton ──────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #1a1a1a 25%,
+    #242424 50%,
+    #1a1a1a 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+ 
+/* ── Countdown ring urgent flash ───────────────────────────────────────────── */
+@keyframes urgent-flash {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+.urgent-flash {
+  animation: urgent-flash 0.8s ease-in-out infinite;
+}
+ 
+/* ── Idle particle float ───────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px)   scale(1);
+    opacity:   0.12;
+  }
+  33% {
+    transform: translateY(-18px) scale(1.15);
+    opacity:   0.28;
+  }
+  66% {
+    transform: translateY(-8px)  scale(0.9);
+    opacity:   0.18;
+  }
+}
+.float-particle {
+  animation: float var(--duration, 5s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+ 
+/* ── Status pill pulse ─────────────────────────────────────────────────────── */
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+.status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+ 
+/* ── Radial background accent ──────────────────────────────────────────────── */
+.kiosk-bg-radial {
+  background: radial-gradient(
+    ellipse 900px 700px at 50% 55%,
+    rgba(245, 166, 35, 0.04) 0%,
+    transparent 70%
+  );
+}
+ 
+/* ── Subtle grid overlay ───────────────────────────────────────────────────── */
+.kiosk-grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+ 
+/* ── Glass card ────────────────────────────────────────────────────────────── */
+.glass-card {
+  background:  rgba(255, 255, 255, 0.03);
+  border:      1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+ 
+/* ── Amber badge ───────────────────────────────────────────────────────────── */
+.amber-badge {
+  background: rgba(245, 166, 35, 0.1);
+  border:     1px solid rgba(245, 166, 35, 0.25);
+  color:      #f5a623;
+}
+ 
+/* ── Emerald badge ─────────────────────────────────────────────────────────── */
+.emerald-badge {
+  background: rgba(74, 222, 128, 0.08);
+  border:     1px solid rgba(74, 222, 128, 0.22);
+  color:      #4ade80;
+}
+ 
+/* ── Typography utilities ──────────────────────────────────────────────────── */
+.font-kiosk {
+  font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+}
+ 
+.font-mono-kiosk {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-variant-numeric: tabular-nums;
+}
+ 
+/* ── Responsive kiosk breakpoints ──────────────────────────────────────────── */
+ 
+/* Tablet portrait (wall-mounted 10") */
+@media (max-width: 1024px) {
+  .kiosk-feed-panel {
+    display: none;
+  }
+  .kiosk-qr-col {
+    width: 100%;
+  }
+}
+ 
+/* Large monitor / TV (1080p+) */
+@media (min-width: 1920px) {
+  .kiosk-qr-size {
+    --qr-size: 400px;
+  }
+}
+ 
+/* Prevent font scaling on iOS kiosk */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust:         100%;
 }

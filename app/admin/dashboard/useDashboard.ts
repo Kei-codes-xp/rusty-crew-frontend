@@ -35,13 +35,13 @@ export function useDashboard() {
 
   const activeEmployees = safeEmployees.filter(e => e.status === "Active");
 
-  const todayLogs = timeLogs.filter(l => l.date === today);
+  const todayLogs = timeLogs?.filter(l => l.date === today);
 
-  const onShiftToday = todayLogs.filter(l => !l.clockOut).length;
+  const onShiftToday = todayLogs?.filter(l => !l.clockOut).length ?? 0;
 
-  const totalHoursWeek = timeLogs.reduce((sum, l) => sum + l.hoursWorked, 0);
+  const totalHoursWeek = timeLogs?.reduce((sum, l) => sum + l.hoursWorked, 0) ?? 0;
 
-  const pendingLeaves = leaves.filter(l => l.status === "Pending");
+  const pendingLeaves = leaves?.filter(l => l.status === "Pending");
 
 
 

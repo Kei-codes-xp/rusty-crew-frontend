@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LeaveRequest } from "@/types/leave";
-import { INITIAL_LEAVES } from "@/app/dashboard/data";
-import { useDashboard } from "@/app/dashboard/useDashboard";
 import { Employee } from "@/types/employee";
+import api from "@/lib/api";
 
 
 export function useLeave() {
-  const [leaves, setLeaves] = useState<LeaveRequest[]>(INITIAL_LEAVES);
+  const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
 
   const [leaveForm, setLeaveForm] = useState({
     from: '',
@@ -26,6 +25,19 @@ export function useLeave() {
     setLeaves(prev => [...prev, newLeave]);
   }
 
+  async function fetchLeaves()  {
+    try {
+      const res = await api.get('/leaves');
+      setLeaves(res.data);
+    } catch (err) {
+      console.error("Failed to fetch leaves:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeaves();
+  }, []);
+
   function resetForm() {
     setLeaveForm({
       from: '',
@@ -35,10 +47,18 @@ export function useLeave() {
     });
   }
 
-  function updateLeave(id: number, status: LeaveRequest["status"]) {
-    setLeaves(prev =>
-      prev.map(l => (l.id === id ? { ...l, status } : l))
-    );
+  async function updateLeave(id: number, status: LeaveRequest["status"]) {
+    // setLeaves(prev =>
+    //   prev.map(l => (l.id === id ? { ...l, status } : l))
+    // );
+    try {
+      const endpoint = status === 'Approved' ? `/leaves/${id}/approve` : `/leaves/${id}/deny`;
+      await api.patch(endpoint);
+
+      await fetchLeaves();
+    } catch (err) {
+      console.error("Failed to update leave:", err);
+    }
   }
 
   return {

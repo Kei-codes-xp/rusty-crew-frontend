@@ -89,7 +89,7 @@ export const S: Styles = {
 
   btnDanger: { background: "#3d1a1a", color: "#f87171", border: "1px solid #5a1a1a", borderRadius: 6, padding: "4px 10px", fontSize: 12, cursor: "pointer" },
 
-  modal: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
+  modal: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, },
 
   mCard: { background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: 12, padding: 24, width: 420, maxWidth: "95vw", maxHeight: "90vh", overflowY: "auto" },
 

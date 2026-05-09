@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useQrScanner } from "../hooks/useQrScanner";
+import { useQrScanner } from "../hooks/QrScanner";
 
 type QrScannerProps = {
   enabled: boolean;

@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useDashboard } from "@/app/dashboard/useDashboard";
+import { useDashboard } from "@/app/admin/dashboard/useDashboard";
 import Avatar from "@/components/Avatar";
 import { S } from "@/styles/dashboardStyles";
 import { useAuth } from "@/context/AuthContext";
@@ -15,13 +15,13 @@ import { useNotifications } from "@/features/notification/hooks/useNotification"
 
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/employees", label: "Employees" },
-  { href: "/dashboard/attendance", label: "Attendance" },
-  { href: "/dashboard/schedule", label: "Schedule" },
-  { href: "/dashboard/payroll", label: "Payroll" },
-  { href: "/dashboard/leaves", label: "Leaves" },
-  { href: "/dashboard/notifications", label: "Notifications" },
+  { href: "/admin/dashboard", label: "Dashboard" },
+  { href: "/admin/dashboard/employees", label: "Employees" },
+  { href: "/admin/dashboard/attendance", label: "Attendance" },
+  { href: "/admin/dashboard/schedule", label: "Schedule" },
+  { href: "/admin/dashboard/payroll", label: "Payroll" },
+  { href: "/admin/dashboard/leaves", label: "Leaves" },
+  { href: "/admin/dashboard/notifications", label: "Notifications" },
 ];
 
 export default function DashboardLayout({
@@ -110,7 +110,7 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/dashboard/notifications">
+            <Link href="/admin/dashboard/notifications">
               <button
                 style={{
                   ...S.btnSm,

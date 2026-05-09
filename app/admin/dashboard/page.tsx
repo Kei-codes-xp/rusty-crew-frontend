@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useDashboard } from "@/app/dashboard/useDashboard";
+import { useDashboard } from "@/app/admin/dashboard/useDashboard";
 
 import Avatar from "@/components/Avatar";
 import RoleBadge from "@/components/RoleBadge";
@@ -33,8 +33,6 @@ const DashboardPage = () => {
   const TODAY = new Date().toISOString().slice(0, 10);
   const safeEmployees = Array.isArray(employees) ? employees : [];
 
-  console.log("Employees:", employees)
-
 
   return (
     <div>
@@ -49,7 +47,7 @@ const DashboardPage = () => {
           },
           {
             label: "On shift today",
-            val: todayLogs.filter(l => !l.clockOut).length,
+            val: todayLogs?.filter(l => !l.clockOut).length ?? 0,
             sub: "Currently clocked in",
           },
           {
@@ -82,13 +80,13 @@ const DashboardPage = () => {
         <div style={S.card}>
           <div style={S.h2}>Today's Shifts</div>
 
-          {todayLogs.length === 0 && (
+          {todayLogs?.length === 0 && (
             <div style={{ color: "#FFFFFF", fontSize: 13 }}>
               No clock-ins today
             </div>
           )}
 
-          {todayLogs.map(log => {
+          {todayLogs?.map(log => {
             const emp = safeEmployees.find(e => e.id === log.employeeId);
             if (!emp) return null;
 
@@ -171,7 +169,7 @@ const DashboardPage = () => {
           <div style={S.card}>
             <div style={S.h2}>Recent Clock-ins</div>
 
-            {todayLogs.slice(0, 3).map(log => {
+            {todayLogs?.slice(0, 3).map(log => {
               const emp = safeEmployees.find(e => e.id === log.employeeId);
               if (!emp) return null;
 
@@ -213,8 +211,8 @@ const DashboardPage = () => {
 
           <tbody>
             {activeEmployees.map(emp => {
-              const logs = timeLogs.filter(l => l.employeeId === emp.id);
-              const hrs = logs.reduce((s, l) => s + l.hoursWorked, 0);
+              const logs = timeLogs?.filter(l => l.employeeId === emp.id);
+              const hrs = logs?.reduce((s, l) => s + l.hoursWorked, 0) ?? 0;
 
               return (
                 <tr key={emp.id}>

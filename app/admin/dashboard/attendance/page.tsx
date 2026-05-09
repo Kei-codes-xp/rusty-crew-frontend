@@ -7,8 +7,6 @@ import { useDashboard } from "../useDashboard";
 import { TODAY } from "@/constants/calendar";
 import { S } from "@/styles/dashboardStyles";
 import Avatar from "@/components/Avatar";
-import { useQrScanner } from "@/features/attendance/hooks/useQrScanner";
-import QrScanner from "@/features/attendance/components/QrScanner";
 
 
 const AttendancePage = () => {
@@ -26,7 +24,7 @@ const AttendancePage = () => {
     function manualClock() {
         const emp = employees.find(e => e.id === parseInt(manualEmpId) && e.status === 'Active');
         if (!emp || !manualTime) return;
-        setTimeLogs(prev => [...prev, {
+        setTimeLogs(prev => [...prev??[], {
             id: Date.now(), employeeId: emp.id, date: TODAY,
             clockIn: manualType === 'in' ? manualTime : null,
             clockOut: manualType === 'out' ? manualTime : null,
@@ -73,10 +71,10 @@ const AttendancePage = () => {
                 <div style={S.card}>
                     <div style={S.h2}>Today's Summary</div>
                     {[
-                        { label: 'Clocked In', val: timeLogs.filter(l => l.date === TODAY && l.clockIn).length, color: '#4ade80' },
-                        { label: 'On Time', val: timeLogs.filter(l => l.date === TODAY && l.status === 'On time').length, color: '#4ade80' },
-                        { label: 'Late', val: timeLogs.filter(l => l.date === TODAY && l.status === 'Late').length, color: '#fb923c' },
-                        { label: 'Not clocked', val: activeEmployees.length - timeLogs.filter(l => l.date === TODAY).length, color: '#f87171' },
+                        { label: 'Clocked In', val: timeLogs?.filter(l => l.date === TODAY && l.clockIn).length, color: '#4ade80' },
+                        { label: 'On Time', val: timeLogs?.filter(l => l.date === TODAY && l.status === 'On time').length, color: '#4ade80' },
+                        { label: 'Late', val: timeLogs?.filter(l => l.date === TODAY && l.status === 'Late').length, color: '#fb923c' },
+                        { label: 'Not clocked', val: activeEmployees.length - (timeLogs?.filter(l => l.date === TODAY).length ?? 0), color: '#f87171' },
                     ].map(s => (
                         <div key={s.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #1e1e1e' }}>
                             <span style={{ fontSize: 13, color: '#888' }}>{s.label}</span>
@@ -97,7 +95,7 @@ const AttendancePage = () => {
                         <th style={S.th}>Method</th><th style={S.th}>Status</th>
                     </tr></thead>
                     <tbody>
-                        {timeLogs.filter(l => l.date === TODAY).map(log => {
+                        {timeLogs?.filter(l => l.date === TODAY).map(log => {
                             const emp = employees.find(e => e.id === log.employeeId);
                             if (!emp) return null;
                             return (

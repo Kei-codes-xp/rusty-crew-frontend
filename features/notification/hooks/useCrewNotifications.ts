@@ -17,7 +17,7 @@ export function useEmployeeNotifications() {
 
   const fetch = useCallback(async () => {
     try {
-      const res = await api.get<Notification[]>('/notifications/crew');
+      const res = await api.get<Notification[]>('/notifications');
       setNotifications(res.data);
     } catch {
       // silently fail on background poll
@@ -33,7 +33,7 @@ export function useEmployeeNotifications() {
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
     try {
-      await api.patch(`/notifications/crew/${id}/read`);
+      await api.patch(`/notifications/${id}/read`);
     } catch {
       // rollback on failure
       await fetch();
@@ -44,7 +44,7 @@ export function useEmployeeNotifications() {
   async function markAllRead(): Promise<void> {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     try {
-      await api.patch('/notifications/crew/read-all');
+      await api.patch('/notifications/read-all');
     } catch {
       await fetch();
     }

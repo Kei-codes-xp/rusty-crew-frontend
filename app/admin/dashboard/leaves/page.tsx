@@ -24,6 +24,8 @@ const LeavesPage = () => {
     } = useLeave();
     const [addLeave, setAddLeave] = useState(false);
 
+
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -33,9 +35,9 @@ const LeavesPage = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
                 {[
-                    { label: 'Pending', val: leaves.filter(l => l.status === 'Pending').length, color: '#fbbf24' },
-                    { label: 'Approved', val: leaves.filter(l => l.status === 'Approved').length, color: '#4ade80' },
-                    { label: 'Denied', val: leaves.filter(l => l.status === 'Denied').length, color: '#f87171' },
+                    { label: 'Pending', val: leaves?.filter(l => l.status === 'Pending').length, color: '#fbbf24' },
+                    { label: 'Approved', val: leaves?.filter(l => l.status === 'Approved').length, color: '#4ade80' },
+                    { label: 'Denied', val: leaves?.filter(l => l.status === 'Denied').length, color: '#f87171' },
                 ].map(m => (
                     <div key={m.label} style={S.metric}>
                         <div style={{ fontSize: 11, color: '#555', marginBottom: 4 }}>{m.label}</div>
@@ -52,7 +54,7 @@ const LeavesPage = () => {
                         <th style={S.th}>Reason</th><th style={S.th}>Status</th><th style={S.th}>Action</th>
                     </tr></thead>
                     <tbody>
-                        {leaves.map(l => {
+                        {leaves?.map(l => {
                             const emp = employees.find(e => e.id === l.employeeId);
                             return (
                                 <tr key={l.id}>
