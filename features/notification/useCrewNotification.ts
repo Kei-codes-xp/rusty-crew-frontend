@@ -20,9 +20,10 @@ export function useEmployeeNotifications() {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/notifications');
+      const res = await api.get('/notifications/crew');
 
       setNotifications(res.data.data ?? res.data);
+      console.log('Fetched notifications:', res.data);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     } finally {

@@ -1,68 +1,144 @@
-"use client"
-import { useEffect, useState } from "react";
-import { Shift, ShiftType, SwapRequest } from "@/types/schedule";
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
 import api from "@/lib/api";
+import { Shift, ShiftType, SwapRequest } from "@/types/schedule";
+
+type UpdateShiftPayload = {
+  empId: number;
+  date: string;
+  type: ShiftType;
+};
 
 export function useSchedule(weekStart: string) {
-  const [shifts, setShifts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [swaps, setSwaps] = useState<SwapRequest[]>([]);
+  const queryClient = useQueryClient();
   const [processingId, setProcessingId] = useState<number | null>(null);
 
-  async function fetchData() {
-    try {
-      setLoading(true);
 
-      const [shiftRes, swapRes] = await Promise.all([
-        api.get("/shifts", { params: { weekStart } }),
-        api.get("/shifts/swaps", { params: { weekStart } }),
+  // -----------------------------
+  // SHIFTS QUERY
+  // -----------------------------
+  const { data: shifts = [], isLoading: shiftsLoading } = useQuery<
+    Shift[]
+  >({
+    queryKey: ["shifts", weekStart],
+    queryFn: async () => {
+      const res = await api.get<Shift[]>("/shifts", {
+        params: { weekStart },
+      });
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const shiftMap = useMemo(() => {
+    const map = new Map<string, ShiftType>();
+
+    shifts.forEach((s) => {
+      map.set(`${s.employeeId}-${s.date}`, s.type);
+    });
+
+    return map;
+  }, [shifts]);
+
+
+  // -----------------------------
+  // SWAPS QUERY
+  // -----------------------------
+  const { data: swaps = [], isLoading: swapsLoading } = useQuery<
+    SwapRequest[]
+  >({
+    queryKey: ["swaps", weekStart],
+    queryFn: async () => {
+      const res = await api.get<SwapRequest[]>("/shifts/swaps", {
+        params: { weekStart },
+      });
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // -----------------------------
+  // SHIFT LOOKUP
+  // -----------------------------
+  const getShift = (empId: number, date: string): ShiftType => {
+    return shiftMap.get(`${empId}-${date}`) ?? "Off";
+  };
+
+  // -----------------------------
+  // OPTIMISTIC SHIFT UPDATE
+  // -----------------------------
+  const updateShiftMutation = useMutation({
+    mutationFn: async (payload: UpdateShiftPayload) => {
+      return api.post("/shifts", {
+        employeeId: payload.empId,
+        date: payload.date,
+        type: payload.type,
+      });
+    },
+
+    onMutate: async (newShift: UpdateShiftPayload) => {
+      await queryClient.cancelQueries({
+        queryKey: ["shifts", weekStart],
+      });
+
+      const prev = queryClient.getQueryData<Shift[]>([
+        "shifts",
+        weekStart,
       ]);
 
-      setShifts(shiftRes.data);
-      setSwaps(swapRes.data);
-    } catch (err) {
-      console.error("Failed to fetch schedule data", err);
-    } finally {
-      setLoading(false);
-    }
-  }
+      queryClient.setQueryData<Shift[]>(
+        ["shifts", weekStart],
+        (old = []) => {
+          return old.map((s) =>
+            s.employeeId === newShift.empId &&
+              s.date === newShift.date
+              ? { ...s, type: newShift.type }
+              : s
+          );
+        }
+      );
 
-  useEffect(() => {
-    fetchData();
-  }, [weekStart]);
+      return { prev };
+    },
 
-  function getShift(empId: number, date: string): ShiftType {
-    const override = shifts.find(
-      s => s.employeeId === empId && s.date === date
-    );
+    onError: (_err, _vars, context) => {
+      if (context?.prev) {
+        queryClient.setQueryData(
+          ["shifts", weekStart],
+          context.prev
+        );
+      }
+    },
 
-    return override ? override.type : "Off";
-  }
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["shifts", weekStart],
+      });
+    },
+  });
 
-  async function updateShift(empId: number, date: string, type: string) {
-    setShifts(prev =>
-      prev.map(s =>
-        s.employeeId === empId && s.date === date
-          ? { ...s, type }
-          : s
-      )
-    );
-    await api.post("/shifts", {
-      employeeId: empId,
-      date,
-      type,
-    });
+  const updateShift = (
+    empId: number,
+    date: string,
+    type: ShiftType
+  ) => {
+    updateShiftMutation.mutate({ empId, date, type });
+  };
 
-    const res = await api.get("/shifts", {
-      params: { weekStart },
-    });
-
-    setShifts(res.data);
-
-  }
-
-
-  async function handleSwap(id: number, action: "Approved" | "Denied") {
+  // -----------------------------
+  // SWAP ACTIONS
+  // -----------------------------
+  const handleSwap = async (
+    id: number,
+    action: "Approved" | "Denied"
+  ) => {
     try {
       setProcessingId(id);
 
@@ -73,14 +149,40 @@ export function useSchedule(weekStart: string) {
 
       await api.patch(endpoint);
 
-      await fetchData(); // re-sync shifts + swaps
+      queryClient.invalidateQueries({
+        queryKey: ["swaps", weekStart],
+      });
 
+      queryClient.invalidateQueries({
+        queryKey: ["shifts", weekStart],
+      });
     } catch (err) {
       console.error("Swap update failed", err);
     } finally {
       setProcessingId(null);
     }
-  }
+  };
 
-  return { shifts, getShift, updateShift, setSwaps, swaps, handleSwap, processingId,  };
+  // -----------------------------
+  // PRECOMPUTED SWAP LOOKUP (FAST)
+  // -----------------------------
+  const pendingSwapSet = useMemo(() => {
+    return new Set(
+      swaps
+        .filter((s) => s.status === "Pending")
+        .map((s) => `${s.requesterId}-${s.date}`)
+    );
+  }, [swaps]);
+
+  return {
+    shifts,
+    swaps,
+    getShift,
+    updateShift,
+    handleSwap,
+    processingId,
+    pendingSwapSet,
+    shiftsLoading,
+    swapsLoading,
+  };
 }

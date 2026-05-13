@@ -47,7 +47,7 @@ body {
   padding:    0;
   background: #0e0e0e;
   color:      var(--text-primary);
-  overflow:   hidden;
+  overflow-y:   hidden;
   -webkit-font-smoothing:  antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -230,6 +230,11 @@ body {
   }
   .kiosk-qr-col {
     width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  body{
+    overflow-y: auto;
   }
 }
  

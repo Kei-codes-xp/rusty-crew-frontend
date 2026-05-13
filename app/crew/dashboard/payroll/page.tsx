@@ -1,136 +1,147 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useEmployeePayroll } from '@/features/payroll/hooks/useEmployeePayroll';
-import { getWeekDates } from '@/utils/date';
+import { useState }              from 'react';
+import { usePayrollEmployee }    from '@/features/payroll/usePayrollEmployee';
+import PayslipCard               from '@/components/payroll/PayslipCard';
+import { PayrollPeriod, FREQUENCY_LABELS } from '@/types/payroll';
 
 const S = {
   card:  { background: '#1a1a1a', border: '1px solid #252525', borderRadius: 12, padding: '14px 16px' } as React.CSSProperties,
-  h2:    { fontSize: 12, fontWeight: 600, color: '#555', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 12 },
-  btn:   { background: '#f5a623', color: '#0f0f0f', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' } as React.CSSProperties,
-  btnSm: { background: '#1e1e1e', color: '#ccc', border: '1px solid #2a2a2a', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' } as React.CSSProperties,
-  input: { background: '#111', border: '1px solid #2a2a2a', borderRadius: 7, padding: '8px 11px', fontSize: 13, color: '#e8e8e8', fontFamily: 'inherit' } as React.CSSProperties,
-  row:   { display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid #1c1c1c' } as React.CSSProperties,
+  btnSm: { background: '#1e1e1e', color: '#ccc', border: '1px solid #2a2a2a', borderRadius: 7, padding: '6px 13px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' } as React.CSSProperties,
+  btn:   { background: '#f5a623', color: '#0f0f0f', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' } as React.CSSProperties,
 };
 
-export default function PayrollPage() {
-  const { user }    = useAuth();
-  const payrollHook = useEmployeePayroll(user?.id ?? 0);
+const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
+  draft:  { bg: 'rgba(245,166,35,0.1)',  fg: '#f5a623' },
+  locked: { bg: 'rgba(74,222,128,0.08)', fg: '#4ade80' },
+  voided: { bg: 'rgba(248,113,113,0.08)',fg: '#f87171' },
+};
 
-  const [from, setFrom] = useState(getWeekDates(0)[0]);
-  const [to,   setTo]   = useState(getWeekDates(0)[6]);
+export default function EmployeePayrollPage() {
+  const { periods, selectedPeriod, entry, loading, error, fetchEntry, downloadPdf } = usePayrollEmployee();
+  const [view, setView] = useState<'list' | 'detail'>('list');
 
-  const { payroll, loading, error } = payrollHook;
-
-  function handleFetch() {
-    payrollHook.fetchPayroll(from, to);
+  function handleSelect(period: PayrollPeriod) {
+    fetchEntry(period);
+    setView('detail');
   }
-
-  if (!user) return null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ fontSize: 15, fontWeight: 700 }}>Payroll</div>
 
-      {/* ── Period selector ───────────────────────────────────────────────── */}
-      <div style={S.card}>
-        <div style={S.h2}>Select period</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
-          <div>
-            <label style={{ fontSize: 11, color: '#555', display: 'block', marginBottom: 4 }}>From</label>
-            <input type="date" style={{ ...S.input, width: '100%' }} value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div>
-            <label style={{ fontSize: 11, color: '#555', display: 'block', marginBottom: 4 }}>To</label>
-            <input type="date" style={{ ...S.input, width: '100%' }} value={to} onChange={(e) => setTo(e.target.value)} />
-          </div>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: 15, fontWeight: 700 }}>
+          {view === 'detail' && selectedPeriod
+            ? <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  onClick={() => setView('list')}
+                  style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 16, padding: 0 }}
+                >
+                  ←
+                </button>
+                Payslip
+              </span>
+            : 'My Payroll'}
         </div>
-        <button style={{ ...S.btn, width: '100%' }} onClick={handleFetch} disabled={loading}>
-          {loading ? 'Loading…' : 'View Payroll'}
-        </button>
+        {view === 'detail' && selectedPeriod && (
+          <button style={S.btn} onClick={() => downloadPdf(selectedPeriod)}>
+            ↓ Download
+          </button>
+        )}
       </div>
 
+      {/* Error */}
       {error && (
-        <div style={{ background: '#2d0f0f', border: '1px solid #4a1a1a', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#f87171' }}>
-          {error}
+        <div style={{
+          padding: '10px 14px', borderRadius: 9, fontSize: 13, fontWeight: 600,
+          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.22)',
+          color: '#f87171',
+        }}>
+          ⚠ {error}
         </div>
       )}
 
-      {/* ── Payroll breakdown ─────────────────────────────────────────────── */}
-      {payroll && (
+      {/* ── List view ── */}
+      {view === 'list' && (
         <>
-          {/* Pay type */}
-          <div style={{ ...S.card, background: '#0f1a10', border: '1px solid #1a3a1a', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#555', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Estimated Gross Pay
+          {loading ? (
+            <div style={{ ...S.card, color: '#444', fontSize: 13, textAlign: 'center', padding: '2.5rem' }}>
+              Loading payroll history…
             </div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: '#4ade80', letterSpacing: -1 }}>
-              ₱{payroll.gross.toLocaleString()}
-            </div>
-            <div style={{ fontSize: 11, color: '#555', marginTop: 4 }}>
-              {from} → {to}
-            </div>
-          </div>
-
-          {/* Breakdown */}
-          <div style={S.card}>
-            <div style={S.h2}>Breakdown</div>
-
-            {[
-              { label: 'Pay type',       val: payroll.isSalaried ? 'Salaried' : 'Hourly', color: '#888' },
-              { label: 'Rate',           val: payroll.isSalaried ? `₱${payroll.monthlySalary.toLocaleString()}/mo` : `₱${payroll.hourlyRate}/hr`, color: '#888' },
-              { label: 'Hours worked',   val: `${payroll.totalHours.toFixed(1)}h`,   color: '#ccc' },
-              { label: 'Overtime hours', val: `${payroll.otHours.toFixed(1)}h`,       color: payroll.otHours > 0 ? '#fbbf24' : '#444' },
-              { label: 'Base pay',       val: `₱${payroll.base.toLocaleString()}`,    color: '#ccc' },
-              { label: 'Overtime pay',   val: `₱${payroll.otPay.toFixed(0)}`,         color: payroll.otPay > 0 ? '#fbbf24' : '#444' },
-            ].map(({ label, val, color }) => (
-              <div key={label} style={S.row}>
-                <span style={{ fontSize: 13, color: '#555' }}>{label}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color }}>{val}</span>
+          ) : periods.length === 0 ? (
+            <div style={{ ...S.card, color: '#444', fontSize: 13, textAlign: 'center', padding: '3rem' }}>
+              <div style={{ fontSize: 24, marginBottom: 10 }}>💰</div>
+              No payroll records yet.
+              <div style={{ fontSize: 11, color: '#333', marginTop: 6 }}>
+                Your manager will generate payroll at the end of each period.
               </div>
-            ))}
-
-            {/* Gross total */}
-            <div style={{ ...S.row, borderBottom: 'none', paddingTop: 12, marginTop: 4 }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#e8e8e8' }}>Gross Pay</span>
-              <span style={{ fontSize: 16, fontWeight: 700, color: '#4ade80' }}>₱{payroll.gross.toLocaleString()}</span>
             </div>
-          </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {periods.map(period => {
+                const sc = STATUS_COLORS[period.status] ?? STATUS_COLORS.draft;
+                return (
+                  <div
+                    key={period.id}
+                    style={{
+                      ...S.card,
+                      cursor:   'pointer',
+                      display:  'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 12,
+                      transition: 'border-color 0.15s',
+                    }}
+                    onClick={() => handleSelect(period)}
+                  >
+                    {/* Left */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#e8e8e8', marginBottom: 3 }}>
+                        {period.label}
+                      </div>
+                      <div style={{ fontSize: 11, color: '#555' }}>
+                        {FREQUENCY_LABELS[period.frequency]} ·{' '}
+                        {period.startDate} → {period.endDate}
+                      </div>
+                    </div>
 
-          {/* Daily log */}
-          {payroll.logs.length > 0 && (
-            <div style={S.card}>
-              <div style={S.h2}>Daily breakdown</div>
-              {payroll.logs.map((log) => (
-                <div key={log.date} style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  alignItems: 'center', padding: '7px 0',
-                  borderBottom: '1px solid #1c1c1c',
-                }}>
-                  <span style={{ fontSize: 12, color: '#555' }}>{log.date}</span>
-                  <span style={{ fontSize: 12, color: '#888' }}>{log.hoursWorked.toFixed(1)}h</span>
-                  {log.overtime > 0 && (
-                    <span style={{ fontSize: 11, color: '#fbbf24' }}>+{log.overtime.toFixed(1)}h OT</span>
-                  )}
-                  <span style={{
-                    fontSize: 10, padding: '2px 7px', borderRadius: 10, fontWeight: 600,
-                    background: log.status === 'Late' ? '#3d2a1a' : '#1a3d2b',
-                    color:      log.status === 'Late' ? '#fb923c'  : '#4ade80',
-                  }}>{log.status}</span>
-                </div>
-              ))}
+                    {/* Status + chevron */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                        background: sc.bg, border: `1px solid ${sc.fg}33`, color: sc.fg,
+                      }}>
+                        {period.status === 'locked' ? '🔒 ' : ''}{period.status}
+                      </span>
+                      <span style={{ color: '#333', fontSize: 14 }}>›</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
-
-          {/* Download payslip */}
-          <button
-            style={{ ...S.btn, width: '100%' }}
-            onClick={() => payrollHook.downloadPayslip(from, to)}
-          >
-            ↓ Download Payslip PDF
-          </button>
         </>
+      )}
+
+      {/* ── Detail / Payslip view ── */}
+      {view === 'detail' && (
+        loading ? (
+          <div style={{ ...S.card, color: '#444', fontSize: 13, textAlign: 'center', padding: '2.5rem' }}>
+            Loading payslip…
+          </div>
+        ) : entry && selectedPeriod ? (
+          <PayslipCard
+            period={selectedPeriod}
+            entry={entry}
+            showDailyLogs
+            onDownload={() => downloadPdf(selectedPeriod)}
+          />
+        ) : !error ? (
+          <div style={{ ...S.card, color: '#444', fontSize: 13, textAlign: 'center', padding: '2.5rem' }}>
+            No payslip data available for this period.
+          </div>
+        ) : null
       )}
     </div>
   );

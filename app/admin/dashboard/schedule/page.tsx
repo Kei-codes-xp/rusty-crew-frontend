@@ -35,7 +35,7 @@ const SchedulePage = () => {
 
   const {
     swaps,
-    setSwaps,
+    // setSwaps,
     handleSwap,
     processingId
   } = useSchedule(weekStart);

@@ -20,7 +20,6 @@ export function useDashboard() {
 
   const {
     swaps,
-    setSwaps,
   } = useSchedule(weekStart);
 
 

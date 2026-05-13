@@ -24,9 +24,10 @@ const DashboardPage = () => {
 
   } = useDashboard();
 
+  console.log("timeLogs", timeLogs)
+
   const {
     swaps,
-    setSwaps,
     handleSwap,
   } = useSchedule(weekStart);
 

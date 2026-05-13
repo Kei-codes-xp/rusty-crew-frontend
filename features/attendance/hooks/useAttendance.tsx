@@ -6,7 +6,7 @@ import { se } from "date-fns/locale";
 import api from "@/lib/api";
 
 export function useAttendance() {
-  const [timeLogs, setTimeLogs] = useState<TimeLog[]>();
+  const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

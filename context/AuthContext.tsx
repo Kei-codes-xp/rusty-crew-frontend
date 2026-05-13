@@ -14,6 +14,7 @@ interface AuthCtx {
   loading: boolean;
   login: (token: string, user: Employee) => void;
   logout: () => void;
+  updateUser: (patch: Partial<Employee>) => void;
 }
 
 const AuthContext = createContext<AuthCtx | null>(null);
@@ -46,9 +47,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     window.location.href = '/login';
   };
+  const updateUser = (updated: Partial<Employee>) => {
+    setUser((prev) =>
+      prev ? { ...prev, ...updated } : prev
+    );
+
+    // also sync localStorage
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      localStorage.setItem(
+        'user',
+        JSON.stringify({ ...parsed, ...updated })
+      );
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -59,3 +75,4 @@ export const useAuth = () => {
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
 };
+

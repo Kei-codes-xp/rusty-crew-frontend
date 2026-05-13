@@ -2,14 +2,18 @@ import { useEffect, useState } from "react";
 import { Employee, NewEmployeeForm } from "@/types/employee";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
+import { PayrollEntry } from "@/types/payroll";
+import { getHalfMonthRange } from "@/utils/date";
 
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employeesPayroll, setEmployeesPayroll] = useState<PayrollEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
+  const { from, to } = getHalfMonthRange();
 
 
   // useEffect(() => {
@@ -30,6 +34,7 @@ export function useEmployees() {
       try {
         const res = await api.get("/employees");
         setEmployees(res.data);
+        console.log("data", res.data);
       } finally {
         setLoading(false);
       }
@@ -39,9 +44,12 @@ export function useEmployees() {
   }, []);
 
 
+  // /payroll/weekly
+
+
   const fetchQr = async (id: number) => {
     const res = await api.get(`/employees/${id}/qr`, {
-      responseType: "blob",      
+      responseType: "blob",
     });
 
     const url = URL.createObjectURL(res.data);
@@ -105,7 +113,7 @@ export function useEmployees() {
       )
     );
   }
-    return {
+  return {
     employees,
     loading,
     addEmployee,
@@ -115,5 +123,7 @@ export function useEmployees() {
     showQrModal,
     setShowQrModal,
     updateEmployee,
+    employeesPayroll,
+    
   };
 }

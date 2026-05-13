@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useEmployeeNotifications } from '@/features/notification/hooks/useEmployeeNotifications';
 import Avatar from '@/components/Avatar';
 import api from '@/lib/api';
+import LogoutIcon from '@/components/LogoutIcon';
 
 const NAV = [
   { href: '/crew/dashboard', label: 'Home', icon: '◈' },
@@ -24,18 +25,13 @@ export default function EmployeeLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const { unreadCount } = useEmployeeNotifications();
 
-  async function handleLogout() {
-    try {
-      await api.post('/auth/logout');
-    } catch { }
-    logout();
-    router.push('/login');
-  }
+
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-[#e8e8e8] flex flex-col">
+    // <div className="min-h-screen overflow-y-auto bg-[#0f0f0f] text-[#e8e8e8] flex flex-col">
+      <div className="min-h-screen flex flex-col">
 
       <header className="h-20 sticky top-0 z-50 flex items-center justify-between px-4 bg-[#141414] border-b border-[#222]">
         <div className="flex items-center gap-2">
@@ -54,9 +50,14 @@ export default function EmployeeLayout({ children }: { children: ReactNode }) {
             )}
           </Link>
 
-          <button onClick={handleLogout}>
+          {/* <button onClick={handleLogout}>
             <Avatar emp={user} size={28} />
-          </button>
+          </button> */}
+            {/* <LogoutIcon /> */}
+
+          <Link href="/crew/dashboard/profile">
+            <Avatar emp={user} size={28} />
+          </Link>
         </div>
       </header>
 
@@ -86,7 +87,7 @@ export default function EmployeeLayout({ children }: { children: ReactNode }) {
           })}
         </aside>
 
-        <main className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full pb-20 md:pb-6">
+        <main className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full pb-24 md:pb-6">
           {children}
         </main>
       </div>

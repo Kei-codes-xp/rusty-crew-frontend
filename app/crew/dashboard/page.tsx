@@ -135,7 +135,7 @@ export default function EmployeeDashboard() {
       <div style={S.card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div style={S.h2}>This Week</div>
-          <Link href="/employee/schedule" style={S.linkBtn}>View →</Link>
+          <Link href="/crew/dashboard/schedule" style={S.linkBtn}>View →</Link>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
           {weekDates.map((date, i) => {
